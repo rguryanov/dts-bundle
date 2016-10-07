@@ -115,7 +115,6 @@ module.exports = function (grunt) {
 	]);	
 	
 	grunt.registerTask('postinstall', [
-		'clean:tmp',
 		'ts:main',
 		'sweep'
 	]);
