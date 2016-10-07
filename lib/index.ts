@@ -96,6 +96,7 @@ export function bundle(options: Options): BundleResult {
     const prefix = optValue(options.prefix, '');
     const separator = optValue(options.separator, '/');
 
+	const typingsDir = path.resolve(optValue(options.typingsDir, 'typings'));	
     const externals = optValue(options.externals, false);
     const exclude = optValue(options.exclude, null);
     const removeSource = optValue(options.removeSource, false);
@@ -134,6 +135,7 @@ export function bundle(options: Options): BundleResult {
     trace('baseDir:      %s', baseDir);
     trace('mainFile:     %s', mainFile);
     trace('outFile:      %s', outFile);
+    trace('typingsDir:    %s', typingsDir);
     trace('externals:    %s', externals ? 'yes' : 'no');
     trace('exclude:      %s', exclude);
     trace('removeSource: %s', removeSource ? 'yes' : 'no');
@@ -235,6 +237,54 @@ export function bundle(options: Options): BundleResult {
             trace('- %s -> %s', name, parse.file);
         });
     });
+	
+	let getExternalMap = function(){
+		let getFilesSync = function(dir) {
+			var results = [];
+			var list = fs.readdirSync(dir);
+			
+			for(var i= 0; i< list.length; i++){
+				var file = list[i];
+				file = path.join(dir,file);
+				var stat = fs.statSync(file);
+				if (stat && stat.isDirectory()) {
+					results = results.concat(getFilesSync(file));
+				} else {
+					results.push(file);
+				}
+			}	
+			return results;
+		};
+		
+		let fileMap = Object.create(null);
+		let files = getFilesSync(typingsDir);
+		let queue = files.slice(0);
+		let queueSeen = Object.create(null);
+		while (queue.length > 0) {
+			let target = queue.shift();
+            if (queueSeen[target]) {
+                continue;
+            }
+			queueSeen[target] = true;
+            let parse = parseFile(target);
+			fileMap[parse.file] = parse;
+			pushUniqueArr(queue, parse.refs, parse.relativeImports);
+		}
+		
+		let exportsMap = Object.create(null);
+		Object.keys(fileMap).forEach(function (file) {
+			let parse = fileMap[file];
+			parse.exports.forEach(function (name) {
+				assert(!(name in exportsMap), 'already got export for: ' + name);
+				exportsMap[name] = parse;
+				trace('- %s -> %s', name, parse.file);
+			});
+		});
+		
+		return exportsMap;
+	};
+	let exportTypingMap = getExternalMap();
+	exportMap = Object.assign(exportMap, exportTypingMap);
 
     // build list of typings to include in output later
     trace('\n### determine typings to include ###');
