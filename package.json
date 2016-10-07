@@ -42,7 +42,11 @@
     "commander": "^2.9.0",
     "detect-indent": "^0.2.0",
     "glob": "^6.0.4",
-    "mkdirp": "^0.5.0"
+    "mkdirp": "^0.5.0",
+	"grunt-contrib-clean": "^0.5.0",
+    "grunt-dtsm": "^0.2.9",
+    "grunt-mocha-test": "^0.11.0",
+    "grunt-ts": "^1.11.2"
   },
   "devDependencies": {
     "chai": "^1.10.0",
