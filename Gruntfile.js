@@ -112,6 +112,12 @@ module.exports = function (grunt) {
 		'ts:test',
 		'mochaTest:all',
 		'sweep'
+	]);	
+	
+	grunt.registerTask('postinstall', [
+		'clean:tmp',
+		'ts:main',
+		'sweep'
 	]);
 
 	grunt.registerTask('sweep', [

@@ -34,7 +34,7 @@
     "node": ">= 0.10.0"
   },
   "scripts": {
-	"postinstall": "grunt prepublish",
+    "postinstall": "grunt postinstall",
     "test": "grunt test"
   },
   "main": "./index.js",
